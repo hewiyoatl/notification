@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet id="1" author="mark/matt">
+        <createTable tableName="subscriptions">
+            <column name="id" type="varchar(255)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="offer_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime"/>
+            <column name="updated_at" type="datetime"/>
+        </createTable>
+        <modifySql dbms="mysql">
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="2" author="mark">
+        <addColumn tableName="subscriptions">
+            <column name="state" type="varchar(255)" defaultValue="UNKNOWN" />
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="3" author="mark">
+        <addColumn tableName="subscriptions">
+            <column name="topic" type="varchar(255)" />
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="4" author="mark">
+        <dropColumn tableName="subscriptions" columnName="offer_id" />
+    </changeSet>
+
+    <changeSet id="5" author="mark">
+        <addNotNullConstraint
+          columnDataType="varchar(255)"
+          columnName="state"
+          tableName="subscriptions"/>
+
+        <addNotNullConstraint
+            columnDataType="varchar(255)"
+            columnName="topic"
+            tableName="subscriptions"/>
+
+        <addNotNullConstraint
+                columnDataType="datetime"
+                columnName="created_at"
+                tableName="subscriptions"/>
+
+        <addNotNullConstraint
+                columnDataType="datetime"
+                columnName="updated_at"
+                tableName="subscriptions"/>
+    </changeSet>
+
+    <changeSet id="6" author="mark">
+        <createIndex
+                     indexName="idx_phone_number"
+                     tableName="subscriptions">
+            <column name="phone_number" type="varchar(255)"/>
+        </createIndex>
+        <createIndex
+                indexName="idx_topic"
+                tableName="subscriptions">
+            <column name="topic" type="varchar(255)"/>
+        </createIndex>
+        <createIndex
+                indexName="idx_user_id"
+                tableName="subscriptions">
+            <column name="user_id" type="varchar(255)"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="7" author="kevinip">
+        <addUniqueConstraint constraintName="uq_user_id_phone_number_topic"
+                             tableName="subscriptions"
+                             columnNames="user_id, phone_number, topic"/>
+    </changeSet>
+
+    <changeSet id="8" author="mark">
+        <dropUniqueConstraint
+                constraintName="uq_user_id_phone_number_topic"
+                tableName="subscriptions" />
+
+        <dropDefaultValue
+                columnName="state"
+                tableName="subscriptions"/>
+
+        <dropIndex indexName="idx_phone_number"
+                   tableName="subscriptions"/>
+
+        <addColumn tableName="subscriptions">
+            <column name="phone_digest" type="varchar(255)" />
+        </addColumn>
+
+        <addNotNullConstraint
+                columnDataType="varchar(255)"
+                columnName="phone_digest"
+                tableName="subscriptions"/>
+
+        <createIndex
+                indexName="idx_phone_digest"
+                tableName="subscriptions">
+            <column name="phone_digest" type="varchar(255)"/>
+        </createIndex>
+
+        <addUniqueConstraint
+                constraintName="uq_user_id_phone_digest_topic"
+                tableName="subscriptions"
+                columnNames="user_id, phone_digest, topic" />
+    </changeSet>
+
+    <changeSet id="9" author="hewi">
+        <createTable tableName="responses">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="subs_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="datetime"/>
+            <column name="updated_at" type="datetime"/>
+            <column name="msg_body" type="varchar(255)"/>
+        </createTable>
+        <modifySql dbms="mysql">
+            <append value=" engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="10" author="hewiMauricio">
+        <createIndex
+                indexName="idx_subs_id"
+                tableName="responses">
+            <column name="subs_id" type="varchar(255)"/>
+        </createIndex>
+        <createIndex
+                indexName="idx_created_at"
+                tableName="responses">
+            <column name="created_at" type="datetime"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="11" author="MauricioHewi">
+        <addColumn tableName="subscriptions">
+            <column name="long_code" type="varchar(255)" />
+        </addColumn>
+
+    </changeSet>
+
+    <changeSet id="12" author="hewi">
+        <createTable tableName="requests">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="subs_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="msg_body" type="varchar(255)"/>
+            <column name="msg_type" type="varchar(255)"/>
+        </createTable>
+        <modifySql dbms="mysql">
+            <append value="engine innodb"/>
+        </modifySql>
+    </changeSet>
+    <changeSet id="13" author="Hewi">
+        <addForeignKeyConstraint baseTableName="requests" baseColumnNames="subs_id"
+                                 constraintName="fk_requests_subscriptions"
+                                 referencedTableName="subscriptions"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+    <changeSet id="14" author="Hewi">
+    <createIndex
+            indexName="idx_long_code"
+            tableName="subscriptions">
+        <column name="long_code" type="varchar(255)"/>
+    </createIndex>
+    </changeSet>
+
+    <changeSet id="15" author="hewi">
+        <createTable tableName="window_close">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="offer_id" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price_end_date" type="datetime"/>
+        </createTable>
+        <modifySql dbms="mysql">
+            <append value="engine innodb"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="16" author="hewi">
+        <addUniqueConstraint constraintName="uq_offer_id"
+                             tableName="window_close"
+                             columnNames="offer_id"/>
+    </changeSet>
+
+    <changeSet id="17" author="mauricio/hewi">
+        <addColumn tableName="window_close">
+            <column name="offer_name" type="varchar(255)" />
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="18" author="hewi">
+        <addColumn tableName="requests">
+            <column name="message_id" type="varchar(255)" />
+            <column name="message_status" type="varchar(255)" />
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="19" author="hewi">
+        <addColumn tableName="subscriptions">
+            <column name="offer_name" type="varchar(255)" />
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="20" author="hewi">
+        <dropColumn tableName="window_close" columnName="offer_name" />
+    </changeSet>
+
+</databaseChangeLog>
